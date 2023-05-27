@@ -9,4 +9,8 @@ return {
   --     require("lsp_signature").setup()
   --   end,
   -- },
+  {
+    "tamago324/nlsp-settings.nvim",
+    lazy = false,
+  }
 }
