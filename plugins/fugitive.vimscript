@@ -1,0 +1,42 @@
+" vim: set ft=vim:
+
+function! GetTradingURL(config) abort
+    if a:config['remote'] =~ "git.trading212.io"
+        echo a:config
+        " https://git.trading212.io/trading-backend/quant-trading/trading-simulator.git@master/-/blob/trading_simulator/orders_simulator.py
+        " https://git.trading212.io/trading-backend/quant-trading/trading-simulator/-/blob/master/requirements.txt
+        " https://git.trading212.io/git.trading212.io//-/blob/master/trading_simulator/orders_simulator.py
+        let repository = substitute(matchstr(a:config['remote'], 'git.trading212.io:.*'), ':', '/', '')
+        let repository = substitute(repository, '.git$', '', '')
+        let commit = a:config['commit']
+        let path = a:config['path']
+        let url = printf("https://%s/-/blob/%s/%s",
+            \ repository,
+            \ "master",
+            \ path)
+        let fromLine = a:config['line1']
+        let toLine = a:config['line2']
+        if fromLine > 0 && fromLine == toLine
+            let url .= '#L' . fromLine
+        elseif toLine > 0
+            let url .= '#L' . fromLine . '-' . toLine
+        endif
+        " let buffer=system('base64 -w0', url)
+        " let buffer=substitute(buffer, "\n$", "", "")
+        " let buffer='\e]52;c;'.buffer.'\x07'
+        " silent exe "!echo -ne ".shellescape(buffer)." > ".shellescape(g:tty)
+
+        return url
+    endif
+endfunction
+
+if !exists('g:fugitive_browse_handlers')
+    let g:fugitive_browse_handlers = []
+endif
+
+if index(g:fugitive_browse_handlers, function('GetSourcegraphURL')) < 0
+    call insert(g:fugitive_browse_handlers, function('GetSourcegraphURL'))
+endif
+if index(g:fugitive_browse_handlers, function('GetTradingURL')) < 0
+    call insert(g:fugitive_browse_handlers, function('GetTradingURL'))
+endif
